@@ -1,0 +1,64 @@
+﻿@page "/transferreds/create"
+@using Microsoft.EntityFrameworkCore
+@using DataAcess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Transferred</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Transferred" OnValidSubmit="AddTransferred" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="transferid" class="form-label">TransferID:</label> 
+                <InputNumber id="transferid" @bind-Value="Transferred.TransferID" class="form-control" /> 
+                <ValidationMessage For="() => Transferred.TransferID" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="playerid" class="form-label">PlayerID:</label> 
+                <InputNumber id="playerid" @bind-Value="Transferred.PlayerID" class="form-control" /> 
+                <ValidationMessage For="() => Transferred.PlayerID" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="teamid" class="form-label">TeamID:</label> 
+                <InputNumber id="teamid" @bind-Value="Transferred.TeamID" class="form-control" /> 
+                <ValidationMessage For="() => Transferred.TeamID" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="newteam" class="form-label">NewTeam:</label> 
+                <InputText id="newteam" @bind-Value="Transferred.NewTeam" class="form-control" /> 
+                <ValidationMessage For="() => Transferred.NewTeam" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="oldteam" class="form-label">OldTeam:</label> 
+                <InputText id="oldteam" @bind-Value="Transferred.OldTeam" class="form-control" /> 
+                <ValidationMessage For="() => Transferred.OldTeam" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/transferreds">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Transferred Transferred { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddTransferred()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Transferred.Add(Transferred);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/transferreds");
+    }
+}

@@ -1,0 +1,42 @@
+﻿@page "/teams"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using DataAccess
+@using FootballManagementSystem.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="teams/create">Create New Team</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Team">
+    <PropertyColumn Property="team => team.Name" />
+    <PropertyColumn Property="team => team.Coach" />
+    <PropertyColumn Property="team => team.TeamPlayers" Title="PopularPlayers" />
+    <PropertyColumn Property="team => team.TotalGoal" />
+    <PropertyColumn Property="team => team.LeagueID" />
+
+    <TemplateColumn Context="team">
+        <a href="@($"teams/edit?id={team.ID}")">Edit</a> |
+        <a href="@($"teams/details?id={team.ID}")">Details</a> |
+        <a href="@($"teams/delete?id={team.ID}")">Delete</a> |
+        <a href="@($"teams/list?id={team.ID}")">List</a> | 
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private FootballManagementSystemContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+        context.League.ToList();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

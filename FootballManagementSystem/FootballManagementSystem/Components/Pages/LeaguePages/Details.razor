@@ -1,0 +1,48 @@
+﻿@page "/leagues/details"
+@using Microsoft.EntityFrameworkCore
+@using DataAccess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>League</h2>
+    <hr />
+    @if (league is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">LeagueName</dt>
+            <dd class="col-sm-10">@league.LeagueName</dd>
+            <dt class="col-sm-2">Season</dt>
+            <dd class="col-sm-10">@league.Season</dd>
+        </dl>
+        <div>
+            <a href="@($"/leagues/edit?id={league.ID}")">Edit</a> |
+            <a href="@($"/leagues")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private League? league;
+
+    [SupplyParameterFromQuery]
+    private int ID { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        league = await context.League.FirstOrDefaultAsync(m => m.ID == ID);
+
+        if (league is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

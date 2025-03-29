@@ -1,0 +1,64 @@
+﻿@page "/transferreds/list"
+@using DataAcess
+@using Microsoft.EntityFrameworkCore
+@using FootballManagementSystem.Data
+@inject IDbContextFactory<FootballManagementSystemContext> DbFactory
+
+<PageTitle>Transferred List</PageTitle>
+
+<h1>Transferred List</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Transfer ID</th>
+            <th>Player Name</th>
+            <th>Price</th>
+            <th>New Team</th>
+            <th>Old Team</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (transferredList != null && transferredList.Any())
+        {
+            @foreach (var transferred in transferredList)
+            {
+                <tr>
+                    <td>@transferred.TransferID</td>
+                    <td>@transferred.Player.Name</td>
+                    <td>@transferred.Transfer.Price</td>
+                    <td>@transferred.NewTeam</td>
+                    <td>@transferred.OldTeam</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5">No transfers found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private FootballManagementSystemContext context = default!;
+    private List<Transferred>? transferredList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+        transferredList = await context.Transferred
+            .Include(t => t.Player)
+            .Include(t => t.Transfer)
+            .ToListAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (context != null)
+        {
+            await context.DisposeAsync();
+        }
+    }
+}

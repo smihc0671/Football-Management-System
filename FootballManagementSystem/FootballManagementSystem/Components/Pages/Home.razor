@@ -1,0 +1,155 @@
+﻿@page "/"
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@using Microsoft.EntityFrameworkCore
+@using Radzen
+@using Radzen.Blazor
+@using System.Globalization
+
+<PageTitle>Player Transfers</PageTitle>
+
+<h3>Monthly Player Transfers</h3>
+
+<!-- HTML Tablosu -->
+<table class="table" style="width:400px;">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th>Transfer Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in monthlyTransfers)
+        {
+            <tr>
+                <td>@item.MonthName</td>
+                <td>@item.TransferCount</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Sütun Grafiği -->
+<h3>Monthly Player Transfers</h3>
+
+<RadzenChart Style="width:800px; height:600px;">
+    <RadzenColumnSeries Data="@monthlyTransfers"
+                        CategoryProperty="MonthName"
+                        ValueProperty="TransferCount"
+                        Title="Monthly Transfers">
+        <RadzenSeriesDataLabels Visible="true" />
+    </RadzenColumnSeries>
+
+    <RadzenValueAxis Min="0">
+        <RadzenAxisTitle Text="Transfer Count" />
+    </RadzenValueAxis>
+
+    <RadzenCategoryAxis>
+        <RadzenAxisTitle Text="Month" />
+    </RadzenCategoryAxis>
+</RadzenChart>
+
+<!-- Yeni Eklenen: Aylık Toplam Transfer Fiyatları Pie Chart -->
+<h3>Monthly Transfer Prices</h3>
+
+<table class="table" style="width:400px;">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th>Total Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in monthlyTotalPrices)
+        {
+            <tr>
+                <td>@item.MonthName</td>
+                <td>@item.TotalPrice.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Pie Chart -->
+<h3>Monthly Transfer Prices</h3>
+
+<RadzenChart Style="width:400px; height:400px;">
+    <RadzenPieSeries Data="@monthlyTotalPrices"
+                     CategoryProperty="MonthName"
+                     ValueProperty="TotalPrice"
+                     Title="Monthly Total Prices">
+        <RadzenSeriesDataLabels Visible="true" />
+        <RadzenPieSeriesColorProperty Property="Color" />
+    </RadzenPieSeries>
+</RadzenChart>
+
+@code {
+    private List<MonthlyTransfer> monthlyTransfers = new();
+    private List<MonthlyTotalPrice> monthlyTotalPrices = new();
+
+    public class MonthlyTransfer
+    {
+        public int Month { get; set; }
+        public string MonthName { get; set; } // January, February...
+        public int TransferCount { get; set; }
+    }
+
+    public class MonthlyTotalPrice
+    {
+        public int Month { get; set; }
+        public string MonthName { get; set; } // January, February...
+        public decimal TotalPrice { get; set; } // Total price for each month
+        public string Color { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = await DbFactory.CreateDbContextAsync();
+
+        // Aylık Transfer Sayıları
+        monthlyTransfers = await context.Transferred
+            .Join(context.Transfer,
+                  t => t.TransferID,
+                  tf => tf.ID,
+                  (transferred, transfer) => new { transferred, transfer })
+            .Where(x => x.transfer.Date.HasValue) // Null kontrolü
+            .GroupBy(x => x.transfer.Date.Value.Month)
+            .Select(g => new MonthlyTransfer
+                {
+                    Month = g.Key,
+                    MonthName = CultureInfo.GetCultureInfo("en-US")
+                                                .DateTimeFormat
+                                                .GetMonthName(g.Key),
+                    TransferCount = g.Count()
+
+                })
+            .OrderBy(x => x.Month)
+            .ToListAsync();
+
+        // Aylık Toplam Transfer Fiyatları ve Rastgele Renk Atamaları
+        monthlyTotalPrices = await context.Transferred
+            .Join(context.Transfer,
+                  t => t.TransferID,
+                  tf => tf.ID,
+                  (transferred, transfer) => new { transferred, transfer })
+            .Where(x => x.transfer.Date.HasValue) // Null kontrolü
+            .GroupBy(x => x.transfer.Date.Value.Month)
+            .Select(g => new MonthlyTotalPrice
+                {
+                    Month = g.Key,
+                    MonthName = CultureInfo.GetCultureInfo("en-US")
+                                            .DateTimeFormat
+                                            .GetMonthName(g.Key),
+                    TotalPrice = g.Sum(x => x.transferred.Transfer.Price.HasValue ? (decimal)x.transferred.Transfer.Price.Value : 0m),
+                    Color = GetRandomColor() // Rastgele renk atama
+                })
+            .OrderBy(x => x.Month)
+            .ToListAsync();
+    }
+
+    // Rastgele renk üretme
+    private string GetRandomColor()
+    {
+        Random rand = new Random();
+        return $"#{rand.Next(0x1000000):X6}"; // 6 basamaktan oluşan hex renk kodu
+    }
+}

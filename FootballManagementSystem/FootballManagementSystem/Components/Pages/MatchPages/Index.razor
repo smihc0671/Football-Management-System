@@ -1,0 +1,44 @@
+﻿@page "/matches"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using DataAcess
+@using FootballManagementSystem.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="matches/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Match">
+    <PropertyColumn Property="match => match.FinalScore" />
+    <PropertyColumn Property="match => match.HomeTeamScore" />
+    <PropertyColumn Property="match => match.AwayTeamScore" />
+    <PropertyColumn Property="match => match.AwayTeamName" />
+    <PropertyColumn Property="match => match.HomeTeamName" />
+    <PropertyColumn Property="match => match.Stadium.Location" />
+
+
+    <TemplateColumn Context="match">
+        <a href="@($"matches/edit?id={match.ID}")">Edit</a> |
+        <a href="@($"matches/details?id={match.ID}")">Details</a> |
+        <a href="@($"matches/delete?id={match.ID}")">Delete</a> |
+        <a href="@($"matches/list?id={match.ID}")">List</a> |
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private FootballManagementSystemContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+        context.Stadium.ToList();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

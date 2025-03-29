@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="72dd5bbb578e45b094fc3415b94f672a" Name="Diagram1">
+        <EntityTypeShape EntityType="FootballManagementSystemModel.League" Width="1.5" PointX="0.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="FootballManagementSystemModel.Match" Width="1.5" PointX="5.25" PointY="4.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="FootballManagementSystemModel.Player" Width="1.5" PointX="5.25" PointY="8.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="FootballManagementSystemModel.Plays_ON" Width="1.5" PointX="10.5" PointY="6.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="FootballManagementSystemModel.Stadium" Width="1.5" PointX="3" PointY="0.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="FootballManagementSystemModel.Team" Width="1.5" PointX="3" PointY="4.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="FootballManagementSystemModel.Transfer" Width="1.5" PointX="5.25" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="FootballManagementSystemModel.Transferred" Width="1.5" PointX="7.5" PointY="6.25" IsExpanded="true" />
+        <AssociationConnector Association="FootballManagementSystemModel.FK__Team__LeagueID__4316F928" ManuallyRouted="false" />
+        <AssociationConnector Association="FootballManagementSystemModel.FK__Match__StadiumID__4AB81AF0" ManuallyRouted="false" />
+        <AssociationConnector Association="FootballManagementSystemModel.FK__Match__TeamID__49C3F6B7" ManuallyRouted="false" />
+        <AssociationConnector Association="FootballManagementSystemModel.FK__Plays_ON__MatchI__59FA5E80" ManuallyRouted="false" />
+        <AssociationConnector Association="FootballManagementSystemModel.FK__Player__TeamID__46E78A0C" ManuallyRouted="false" />
+        <AssociationConnector Association="FootballManagementSystemModel.FK__Plays_ON__Player__5AEE82B9" ManuallyRouted="false" />
+        <AssociationConnector Association="FootballManagementSystemModel.FK__Transferr__Playe__5629CD9C" ManuallyRouted="false" />
+        <AssociationConnector Association="FootballManagementSystemModel.FK__Transferr__TeamI__571DF1D5" ManuallyRouted="false" />
+        <AssociationConnector Association="FootballManagementSystemModel.FK__Transferr__Trans__5535A963" ManuallyRouted="false" />
+        <AssociationConnector Association="FootballManagementSystemModel.LeagueTeam" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

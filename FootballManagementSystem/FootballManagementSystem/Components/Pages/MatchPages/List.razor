@@ -1,0 +1,66 @@
+﻿@page "/matches/list"
+@using DataAcess
+@using Microsoft.EntityFrameworkCore
+@using FootballManagementSystem.Data
+
+@inject IDbContextFactory<FootballManagementSystemContext> DbFactory
+
+<PageTitle>Matches List</PageTitle>
+
+<h1>Matches List</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Final Score</th>
+            <th>Home Team Score</th>
+            <th>Away Team Score</th>
+            <th>Away Team Name</th>
+            <th>Home Team Name</th>
+            <th>Stadium Location</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (matches != null && matches.Any())
+        {
+            @foreach (var match in matches)
+            {
+                <tr>
+                    <td>@match.FinalScore</td>
+                    <td>@match.HomeTeamScore</td>
+                    <td>@match.AwayTeamScore</td>
+                    <td>@match.AwayTeamName</td>
+                    <td>@match.HomeTeamName</td>
+                    <td>@match.Stadium.Location</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6">No matches found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private FootballManagementSystemContext context = default!;
+    private List<Match> matches = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+        matches = await context.Match
+            .Include(m => m.Stadium)
+            .ToListAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (context != null)
+        {
+            await context.DisposeAsync();
+        }
+    }
+}

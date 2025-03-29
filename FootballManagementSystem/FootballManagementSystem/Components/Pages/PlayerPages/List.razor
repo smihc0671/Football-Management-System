@@ -1,0 +1,63 @@
+﻿@page "/players/list"
+@using DataAcess
+@using Microsoft.EntityFrameworkCore
+@using FootballManagementSystem.Data
+@inject IDbContextFactory<FootballManagementSystemContext> DbFactory
+
+<PageTitle>Players List</PageTitle>
+
+<h1>Players List</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Position</th>
+            <th>Stats</th>
+            <th>Team Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (players != null && players.Any())
+        {
+            @foreach (var player in players)
+            {
+                <tr>
+                    <td>@player.Name</td>
+                    <td>@player.Age</td>
+                    <td>@player.Position</td>
+                    <td>@player.Stats</td>
+                    <td>@player.Team.Name</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5">No players found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private FootballManagementSystemContext context = default!;
+    private List<Player> players = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+        players = await context.Player
+            .Include(p => p.Team)
+            .ToListAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (context != null)
+        {
+            await context.DisposeAsync();
+        }
+    }
+}

@@ -1,0 +1,109 @@
+﻿@page "/teams/edit"
+@using Microsoft.EntityFrameworkCore
+@using DataAccess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Team</h2>
+<hr />
+@if (Team is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Team" OnValidSubmit="UpdateTeam" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Team.ID" value="@Team.ID" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="Team.Name" class="form-control" />
+                    <ValidationMessage For="() => Team.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="coach" class="form-label">Coach:</label>
+                    <InputText id="coach" @bind-Value="Team.Coach" class="form-control" />
+                    <ValidationMessage For="() => Team.Coach" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="teamplayers" class="form-label">TeamPlayers:</label>
+                    <InputText id="teamplayers" @bind-Value="Team.TeamPlayers" class="form-control" />
+                    <ValidationMessage For="() => Team.TeamPlayers" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="stats" class="form-label">Stats:</label>
+                    <InputNumber id="stats" @bind-Value="Team.TotalGoal" class="form-control" />
+                    <ValidationMessage For="() => Team.TotalGoal" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="leagueid" class="form-label">LeagueID:</label>
+                    <InputNumber id="leagueid" @bind-Value="Team.LeagueID" class="form-control" />
+                    <ValidationMessage For="() => Team.LeagueID" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/teams">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int ID { get; set; }
+
+    [SupplyParameterFromForm]
+    private Team? Team { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Team ??= await context.Team.FirstOrDefaultAsync(m => m.ID == ID);
+
+        if (Team is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateTeam()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Team!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!TeamExists(Team!.ID))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/teams");
+    }
+
+    private bool TeamExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Team.Any(e => e.ID == id);
+    }
+}

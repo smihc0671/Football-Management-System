@@ -1,0 +1,68 @@
+﻿@page "/teams/list"
+@using Microsoft.EntityFrameworkCore
+@using DataAccess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Teams</PageTitle>
+
+<h1>Teams</h1>
+<hr />
+
+@if (Teams is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Coach</th>
+                <th>TeamPlayers</th>
+                <th>Total Goals</th>
+                <th>League ID</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var team in Teams)
+            {
+                <tr>
+                    <td>@team.Name</td>
+                    <td>@team.Coach</td>
+                    <td>@team.TeamPlayers</td>
+                    <td>@team.TotalGoal</td>
+                    <td>@team.LeagueID</td>
+                    <td>
+                        <a href="/teams/edit?id=@team.ID" class="btn btn-primary btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteTeam(team.ID)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <a href="/teams/create" class="btn btn-success">Add New Team</a>
+}
+@code {
+    private List<Team>? Teams;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Teams = await context.Team.ToListAsync();
+    }
+
+    private async Task DeleteTeam(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        var team = await context.Team.FindAsync(id);
+        if (team != null)
+        {
+            context.Team.Remove(team);
+            await context.SaveChangesAsync();
+            Teams = await context.Team.ToListAsync();
+        }
+    }
+}

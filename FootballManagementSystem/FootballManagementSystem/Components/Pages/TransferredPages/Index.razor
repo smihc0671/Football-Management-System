@@ -1,0 +1,44 @@
+﻿@page "/transferreds"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using DataAcess
+@using FootballManagementSystem.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="transferreds/create">Create New Transfer</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Transferred">
+    <PropertyColumn Property="transferred => transferred.TransferID" />
+    <PropertyColumn Property="transferred => transferred.Player.Name" />
+    <PropertyColumn Property="transferred => transferred.Transfer.Price" />
+    <PropertyColumn Property="transferred => transferred.NewTeam" />
+    <PropertyColumn Property="transferred => transferred.OldTeam" />
+    <PropertyColumn Property="transferred => transferred.Transfer.Date" />
+
+    <TemplateColumn Context="transferred">
+        <a href="@($"transferreds/edit?id={transferred.ID}")">Edit</a> |
+        <a href="@($"transferreds/details?id={transferred.ID}")">Details</a> |
+        <a href="@($"transferreds/delete?id={transferred.ID}")">Delete</a> |
+        <a href="@($"transferreds/list?id={transferred.ID}")">List</a> |
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private FootballManagementSystemContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+        context.Player.ToList();
+        context.Transfer.ToList();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

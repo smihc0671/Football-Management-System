@@ -1,0 +1,74 @@
+﻿@page "/matches/create"
+@using Microsoft.EntityFrameworkCore
+@using DataAcess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Match</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Match" OnValidSubmit="AddMatch" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="finalscore" class="form-label">FinalScore:</label> 
+                <InputNumber id="finalscore" @bind-Value="Match.FinalScore" class="form-control" /> 
+                <ValidationMessage For="() => Match.FinalScore" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="hometeamscore" class="form-label">HomeTeamScore:</label> 
+                <InputNumber id="hometeamscore" @bind-Value="Match.HomeTeamScore" class="form-control" /> 
+                <ValidationMessage For="() => Match.HomeTeamScore" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="awayteamscore" class="form-label">AwayTeamScore:</label> 
+                <InputNumber id="awayteamscore" @bind-Value="Match.AwayTeamScore" class="form-control" /> 
+                <ValidationMessage For="() => Match.AwayTeamScore" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="awayteamname" class="form-label">AwayTeamName:</label> 
+                <InputText id="awayteamname" @bind-Value="Match.AwayTeamName" class="form-control" /> 
+                <ValidationMessage For="() => Match.AwayTeamName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="hometeamname" class="form-label">HomeTeamName:</label> 
+                <InputText id="hometeamname" @bind-Value="Match.HomeTeamName" class="form-control" /> 
+                <ValidationMessage For="() => Match.HomeTeamName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="stadiumid" class="form-label">StadiumID:</label> 
+                <InputNumber id="stadiumid" @bind-Value="Match.StadiumID" class="form-control" /> 
+                <ValidationMessage For="() => Match.StadiumID" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="teamid" class="form-label">TeamID:</label> 
+                <InputNumber id="teamid" @bind-Value="Match.TeamID" class="form-control" /> 
+                <ValidationMessage For="() => Match.TeamID" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/matches">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Match Match { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddMatch()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Match.Add(Match);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/matches");
+    }
+}

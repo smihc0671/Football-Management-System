@@ -1,0 +1,119 @@
+﻿@page "/matches/edit"
+@using Microsoft.EntityFrameworkCore
+@using DataAcess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Match</h2>
+<hr />
+@if (Match is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Match" OnValidSubmit="UpdateMatch" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Match.ID" value="@Match.ID" />
+                <div class="mb-3">
+                    <label for="finalscore" class="form-label">FinalScore:</label>
+                    <InputNumber id="finalscore" @bind-Value="Match.FinalScore" class="form-control" />
+                    <ValidationMessage For="() => Match.FinalScore" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="hometeamscore" class="form-label">HomeTeamScore:</label>
+                    <InputNumber id="hometeamscore" @bind-Value="Match.HomeTeamScore" class="form-control" />
+                    <ValidationMessage For="() => Match.HomeTeamScore" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="awayteamscore" class="form-label">AwayTeamScore:</label>
+                    <InputNumber id="awayteamscore" @bind-Value="Match.AwayTeamScore" class="form-control" />
+                    <ValidationMessage For="() => Match.AwayTeamScore" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="awayteamname" class="form-label">AwayTeamName:</label>
+                    <InputText id="awayteamname" @bind-Value="Match.AwayTeamName" class="form-control" />
+                    <ValidationMessage For="() => Match.AwayTeamName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="hometeamname" class="form-label">HomeTeamName:</label>
+                    <InputText id="hometeamname" @bind-Value="Match.HomeTeamName" class="form-control" />
+                    <ValidationMessage For="() => Match.HomeTeamName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="stadiumid" class="form-label">StadiumID:</label>
+                    <InputNumber id="stadiumid" @bind-Value="Match.StadiumID" class="form-control" />
+                    <ValidationMessage For="() => Match.StadiumID" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="teamid" class="form-label">TeamID:</label>
+                    <InputNumber id="teamid" @bind-Value="Match.TeamID" class="form-control" />
+                    <ValidationMessage For="() => Match.TeamID" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/matches">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int ID { get; set; }
+
+    [SupplyParameterFromForm]
+    private Match? Match { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Match ??= await context.Match.FirstOrDefaultAsync(m => m.ID == ID);
+
+        if (Match is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateMatch()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Match!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!MatchExists(Match!.ID))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/matches");
+    }
+
+    private bool MatchExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Match.Any(e => e.ID == id);
+    }
+}

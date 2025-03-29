@@ -1,0 +1,109 @@
+﻿@page "/transferreds/edit"
+@using Microsoft.EntityFrameworkCore
+@using DataAcess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Transferred</h2>
+<hr />
+@if (Transferred is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Transferred" OnValidSubmit="UpdateTransferred" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Transferred.ID" value="@Transferred.ID" />
+                <div class="mb-3">
+                    <label for="transferid" class="form-label">TransferID:</label>
+                    <InputNumber id="transferid" @bind-Value="Transferred.TransferID" class="form-control" />
+                    <ValidationMessage For="() => Transferred.TransferID" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="playerid" class="form-label">PlayerID:</label>
+                    <InputNumber id="playerid" @bind-Value="Transferred.PlayerID" class="form-control" />
+                    <ValidationMessage For="() => Transferred.PlayerID" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="teamid" class="form-label">TeamID:</label>
+                    <InputNumber id="teamid" @bind-Value="Transferred.TeamID" class="form-control" />
+                    <ValidationMessage For="() => Transferred.TeamID" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="newteam" class="form-label">NewTeam:</label>
+                    <InputText id="newteam" @bind-Value="Transferred.NewTeam" class="form-control" />
+                    <ValidationMessage For="() => Transferred.NewTeam" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="oldteam" class="form-label">OldTeam:</label>
+                    <InputText id="oldteam" @bind-Value="Transferred.OldTeam" class="form-control" />
+                    <ValidationMessage For="() => Transferred.OldTeam" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/transferreds">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int ID { get; set; }
+
+    [SupplyParameterFromForm]
+    private Transferred? Transferred { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Transferred ??= await context.Transferred.FirstOrDefaultAsync(m => m.ID == ID);
+
+        if (Transferred is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateTransferred()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Transferred!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!TransferredExists(Transferred!.ID))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/transferreds");
+    }
+
+    private bool TransferredExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Transferred.Any(e => e.ID == id);
+    }
+}

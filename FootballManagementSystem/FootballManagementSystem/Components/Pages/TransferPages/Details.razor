@@ -1,0 +1,48 @@
+﻿@page "/transfers/details"
+@using Microsoft.EntityFrameworkCore
+@using DataAcess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Transfer</h2>
+    <hr />
+    @if (transfer is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Price</dt>
+            <dd class="col-sm-10">@transfer.Price</dd>
+            <dt class="col-sm-2">Date</dt>
+            <dd class="col-sm-10">@transfer.Date</dd>
+        </dl>
+        <div>
+            <a href="@($"/transfers/edit?id={transfer.ID}")">Edit</a> |
+            <a href="@($"/transfers")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Transfer? transfer;
+
+    [SupplyParameterFromQuery]
+    private int ID { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        transfer = await context.Transfer.FirstOrDefaultAsync(m => m.ID == ID);
+
+        if (transfer is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

@@ -1,0 +1,64 @@
+﻿@page "/teams/create"
+@using Microsoft.EntityFrameworkCore
+@using DataAccess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Team</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Team" OnValidSubmit="AddTeam" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label> 
+                <InputText id="name" @bind-Value="Team.Name" class="form-control" /> 
+                <ValidationMessage For="() => Team.Name" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="coach" class="form-label">Coach:</label> 
+                <InputText id="coach" @bind-Value="Team.Coach" class="form-control" /> 
+                <ValidationMessage For="() => Team.Coach" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="teamplayers" class="form-label">TeamPlayers:</label> 
+                <InputText id="teamplayers" @bind-Value="Team.TeamPlayers" class="form-control" /> 
+                <ValidationMessage For="() => Team.TeamPlayers" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="TotalGoal" class="form-label">TotalGoal:</label> 
+                <InputNumber id="stats" @bind-Value="Team.TotalGoal" class="form-control" /> 
+                <ValidationMessage For="() => Team.TotalGoal" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="leagueid" class="form-label">LeagueID:</label> 
+                <InputNumber id="leagueid" @bind-Value="Team.LeagueID" class="form-control" /> 
+                <ValidationMessage For="() => Team.LeagueID" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/teams">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Team Team { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddTeam()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Team.Add(Team);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/teams");
+    }
+}

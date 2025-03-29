@@ -1,0 +1,54 @@
+﻿@page "/transferreds/details"
+@using Microsoft.EntityFrameworkCore
+@using DataAcess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Transferred</h2>
+    <hr />
+    @if (transferred is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">TransferID</dt>
+            <dd class="col-sm-10">@transferred.TransferID</dd>
+            <dt class="col-sm-2">PlayerID</dt>
+            <dd class="col-sm-10">@transferred.PlayerID</dd>
+            <dt class="col-sm-2">TeamID</dt>
+            <dd class="col-sm-10">@transferred.TeamID</dd>
+            <dt class="col-sm-2">NewTeam</dt>
+            <dd class="col-sm-10">@transferred.NewTeam</dd>
+            <dt class="col-sm-2">OldTeam</dt>
+            <dd class="col-sm-10">@transferred.OldTeam</dd>
+        </dl>
+        <div>
+            <a href="@($"/transferreds/edit?id={transferred.ID}")">Edit</a> |
+            <a href="@($"/transferreds")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Transferred? transferred;
+
+    [SupplyParameterFromQuery]
+    private int ID { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        transferred = await context.Transferred.FirstOrDefaultAsync(m => m.ID == ID);
+
+        if (transferred is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

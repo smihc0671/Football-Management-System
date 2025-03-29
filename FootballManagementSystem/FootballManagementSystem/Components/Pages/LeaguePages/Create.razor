@@ -1,0 +1,49 @@
+﻿@page "/leagues/create"
+@using Microsoft.EntityFrameworkCore
+@using DataAccess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>League</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="League" OnValidSubmit="AddLeague" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="leaguename" class="form-label">LeagueName:</label> 
+                <InputText id="leaguename" @bind-Value="League.LeagueName" class="form-control" /> 
+                <ValidationMessage For="() => League.LeagueName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="season" class="form-label">Season:</label> 
+                <InputText id="season" @bind-Value="League.Season" class="form-control" /> 
+                <ValidationMessage For="() => League.Season" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/leagues">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private League League { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddLeague()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.League.Add(League);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/leagues");
+    }
+}

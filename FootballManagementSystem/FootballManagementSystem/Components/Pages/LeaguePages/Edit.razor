@@ -1,0 +1,94 @@
+﻿@page "/leagues/edit"
+@using Microsoft.EntityFrameworkCore
+@using DataAccess
+@inject IDbContextFactory<FootballManagementSystem.Data.FootballManagementSystemContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>League</h2>
+<hr />
+@if (League is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="League" OnValidSubmit="UpdateLeague" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="League.ID" value="@League.ID" />
+                <div class="mb-3">
+                    <label for="leaguename" class="form-label">LeagueName:</label>
+                    <InputText id="leaguename" @bind-Value="League.LeagueName" class="form-control" />
+                    <ValidationMessage For="() => League.LeagueName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="season" class="form-label">Season:</label>
+                    <InputText id="season" @bind-Value="League.Season" class="form-control" />
+                    <ValidationMessage For="() => League.Season" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/leagues">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int ID { get; set; }
+
+    [SupplyParameterFromForm]
+    private League? League { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        League ??= await context.League.FirstOrDefaultAsync(m => m.ID == ID);
+
+        if (League is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateLeague()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(League!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!LeagueExists(League!.ID))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/leagues");
+    }
+
+    private bool LeagueExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.League.Any(e => e.ID == id);
+    }
+}

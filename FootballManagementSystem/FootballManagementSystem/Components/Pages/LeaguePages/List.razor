@@ -1,0 +1,55 @@
+﻿@page "/leagues/list"
+@using DataAccess
+@using Microsoft.EntityFrameworkCore
+@using FootballManagementSystem.Data
+@inject IDbContextFactory<FootballManagementSystemContext> DbFactory
+
+<PageTitle>Leagues List</PageTitle>
+
+<h1>Leagues List</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>League Name</th>
+            <th>Season</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (leagues != null && leagues.Any())
+        {
+            @foreach (var league in leagues)
+            {
+                <tr>
+                    <td>@league.LeagueName</td>
+                    <td>@league.Season</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2">No leagues found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private FootballManagementSystemContext context = default!;
+    private List<League> leagues = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+        leagues = await context.League.ToListAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (context != null)
+        {
+            await context.DisposeAsync();
+        }
+    }
+}
